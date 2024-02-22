@@ -11,7 +11,14 @@ builder.Services.AddControllers();
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
-var dbMysqlConfiguration = new MysqlConfiguration(builder.Configuration.GetConnectionString("DefaultConnection"));
+var strDbConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (strDbConnection == null || strDbConnection == "") {
+   Console.WriteLine("Database configuration not found!");
+   Environment.Exit(0);
+}
+
+var dbMysqlConfiguration = new MysqlConfiguration(strDbConnection);
 
 var mysqlConnection = new MySqlConnection(dbMysqlConfiguration.ConnectionString);
 

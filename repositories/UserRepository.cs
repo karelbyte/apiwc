@@ -1,48 +1,53 @@
 using apiwc.entities;
 using apiwc.interfaces;
 using Dapper;
+using System.Diagnostics;
 using MySql.Data.MySqlClient;
 
 namespace apiwc.repositories;
 
-public class UserRepository: IUserRepository
+public class UserRepository(MySqlConnection mySqlConnection) : IUserRepository
 {
-    private  MySqlConnection _mysqlConnection;
+    private readonly MySqlConnection _mysqlConnection = mySqlConnection;
+
+    private const string SelectAllUserSql = "SELECT * FROM users";
+
+    private const string SelectUserById = @"SELECT * FROM users WHERE id = @Id";
     
-    private const string SelectAllUserSql = "select * from users";
+    private const string UpdateUserById = @"UPDATE users SET names = @names, email = @email, status = @status WHERE id = @Id";
+    
+    private const string CreateUser = @"INSERT INTO users (id, names, email, password, status) VALUES (@Id, @Names, @Email, @Password, @Status)";
 
     protected MySqlConnection Conection
     {
         get => _mysqlConnection;
-    } 
-    
-    public UserRepository(MySqlConnection mySqlConnection)
-    {
-        _mysqlConnection = mySqlConnection;
     }
 
     public async Task<IEnumerable<User>> GetAll()
     {
         return await Conection.QueryAsync<User>(SelectAllUserSql, new { });
     }
-
-    public Task<User> Detail(int id)
+    
+    public async Task<User> Detail(string id)
     {
-        throw new NotImplementedException();
+        return await Conection.QueryFirstOrDefaultAsync<User>(SelectUserById, new { Id = id });
     }
 
-    public Task<User> Create(User user)
+    public async Task<int> Create(User user)
     {
-        throw new NotImplementedException();
+        var myuuid = Guid.NewGuid();
+        user.Id = myuuid.ToString();
+        return await Conection.ExecuteAsync(CreateUser, user);
     }
 
-    public Task<User> Update(User user)
+    public async Task<int> Update(User user)
     {
-        throw new NotImplementedException();
+        return await Conection.ExecuteAsync(UpdateUserById, user);
     }
 
     public Task<bool> Delete(int id)
     {
         throw new NotImplementedException();
     }
+    
 }

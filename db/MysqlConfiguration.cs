@@ -1,14 +1,10 @@
 namespace apiwc.db;
 
-public class MysqlConfiguration
+public class MysqlConfiguration(string sqlString)
 {
-    public MysqlConfiguration(string sqlString)
-    {
-        ConnectionString = sqlString;
-    }
     public string ConnectionString
     {
         get;
         set;
-    }
+    } = sqlString;
 }
